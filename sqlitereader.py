@@ -21,16 +21,6 @@ def clean(line):
     return "".join(char for char in line if (char.isalnum() or "_" == char))
 
 
-## === Classes === ##
-class Category(Enum):
-    """Categories in the database"""
-    GREET = "3"
-    LEFT_SERVER = "5"
-    MENTION = "6,7"
-    ONLINE = "8"
-    SHUTDOWN = "9"
-
-
 class Database(object):
     """ For reading and parsing lines in a SQLite database.
 
