@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import sqlite3
-from enum import Enum
+from contextlib import closing
 
 def clean(line):
     """ Strip a string of non-alphanumerics (except underscores).
@@ -22,7 +22,7 @@ def clean(line):
 
 
 class Database(object):
-    """ For reading and parsing lines in a SQLite database.
+    """ For reading and writing records in a SQLite database.
 
     Args:
         dbFile(unicode): The filepath of the database.
@@ -45,14 +45,15 @@ class Database(object):
         fields = []
         table = clean(table)
         connection = sqlite3.connect(self.db)
-        connection.row_factory = lambda cursor, row: row[0]
-        c = connection.cursor()
-        if maximum:
-            c.execute(f"SELECT {header} FROM {table} LIMIT ?", [maximum])
-        else:
-            c.execute(f"SELECT {header} FROM {table}")
-        fields = c.fetchall()
-        c.close()
+
+        with closing(connection) as connection:
+            connection.row_factory = lambda cursor, row: row[0]
+            c = connection.cursor()
+            if maximum:
+                c.execute(f"SELECT {header} FROM {table} LIMIT ?", [maximum])
+            else:
+                c.execute(f"SELECT {header} FROM {table}")
+            fields = c.fetchall()
         
         return fields
 
@@ -79,18 +80,18 @@ class Database(object):
         field = None
         
         connection = sqlite3.connect(self.db)
-        c = connection.cursor()
 
-        statement = f"SELECT {header} FROM {table} WHERE id=?"
-        logger.debug(statement)
-        c.execute(statement, [field_id])
+        with closing(connection) as connection:
+            c = connection.cursor()
 
-        try:
-            field = c.fetchone()[0]
-        except TypeError:
-            logger.exception(f"ID '{field_id}' was not in table '{table}'")
-        
-        c.close()
+            statement = f"SELECT {header} FROM {table} WHERE id=?"
+            logger.debug(statement)
+            c.execute(statement, [field_id])
+
+            try:
+                field = c.fetchone()[0]
+            except TypeError:
+                logger.exception(f"ID '{field_id}' was not in table '{table}'")
         
         return field
 
@@ -126,47 +127,48 @@ class Database(object):
         clause = ""
         
         connection = sqlite3.connect(self.db)
-        connection.row_factory = lambda cursor, row: row[0]  # Gets first element for fetchall()
 
-        c = connection.cursor()
+        with closing(connection) as connection:
+            connection.row_factory = lambda cursor, row: row[0]  # Gets first element for fetchall()
+            c = connection.cursor()
 
-        if conditions:
-            clause = "WHERE ("
-            clause_list = [clause,]
-            substitutes = []
-            cat_count = 1
-            header_count = 1
-
-            ## TODO: Add ability to specify comparison operator (e.g. =, <, LIKE, etc.)
-            for con in conditions:
-                if 1 < header_count:
-                    clause_list.append(" AND (")
-
-                sub_count = 1
-                subconditions = conditions[con].split(splitter)
-                for sub in subconditions:
-                    if 1 < sub_count:
-                        clause_list.append(" OR ")
-                    
-                    clause_list.append(f"{clean(con)}=?")
-                    substitutes.append(sub)
-                    sub_count += 2
-                    
-                clause_list.append(")")
-                header_count += 2
+            if conditions:
+                clause = "WHERE ("
+                clause_list = [clause,]
+                substitutes = []
                 cat_count = 1
+                header_count = 1
 
-            clause = "".join(clause_list)
+                ## TODO: Add ability to specify comparison operator (e.g. =, <, LIKE, etc.)
+                for con in conditions:
+                    if 1 < header_count:
+                        clause_list.append(" AND (")
 
-            statement = f"SELECT id FROM {table} {clause}"
-            logger.debug(f"(get_ids) Substitutes: {substitutes}")
-            logger.debug(f"(get_ids) SQLite statement: {statement}")
+                    sub_count = 1
+                    subconditions = conditions[con].split(splitter)
+                    for sub in subconditions:
+                        if 1 < sub_count:
+                            clause_list.append(" OR ")
+                        
+                        clause_list.append(f"{clean(con)}=?")
+                        substitutes.append(sub)
+                        sub_count += 2
+                        
+                    clause_list.append(")")
+                    header_count += 2
+                    cat_count = 1
 
-            c.execute(statement, substitutes)
-        else:
-            c.execute(f"SELECT id FROM {table}")
+                clause = "".join(clause_list)
 
-        ids = c.fetchall()
+                statement = f"SELECT id FROM {table} {clause}"
+                logger.debug(f"(get_ids) Substitutes: {substitutes}")
+                logger.debug(f"(get_ids) SQLite statement: {statement}")
+
+                c.execute(statement, substitutes)
+            else:
+                c.execute(f"SELECT id FROM {table}")
+
+            ids = c.fetchall()
 
         return ids
 
@@ -199,16 +201,18 @@ class Database(object):
         line = ""
         
         connection = sqlite3.connect(self.db)
-        c = connection.cursor()
 
-        if conditions:
-            ids = self.get_ids(table, conditions, splitter)
-            if ids:
-                line = random.choice(ids)
-                line = self.get_field(line, header, table)
-        else:
-            c.execute(f"SELECT {header} FROM {table} ORDER BY Random() LIMIT 1")  # TODO: Take categories into account.
-            line = c.fetchone()[0]
+        with closing(connection) as connection:
+            c = connection.cursor()
+
+            if conditions:
+                ids = self.get_ids(table, conditions, splitter)
+                if ids:
+                    line = random.choice(ids)
+                    line = self.get_field(line, header, table)
+            else:
+                c.execute(f"SELECT {header} FROM {table} ORDER BY Random() LIMIT 1")  # TODO: Take categories into account.
+                line = c.fetchone()[0]
 
         return line
 

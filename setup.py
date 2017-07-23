@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
 
-setup(name="sqlitereader",
+setup(name="sqlitehouse",
       version="1.0",
-      description="Simple functions for getting records from a SQLite database.",
+      description="Simple library for reading/writing records in a SQLite database.",
       author="Tumthe3",
       author_email="tumthe3@gmail.com",
-      url="https://github.com/Tumthe3/SQLite-Reader",
-      py_modules=["sqlitereader"],
+      url="https://github.com/Tumthe3/SQLitehouse",
+      py_modules=["sqlitehouse"],
       license="MIT"
      )
