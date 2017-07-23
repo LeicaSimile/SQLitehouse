@@ -202,7 +202,7 @@ class Database(object):
             for row in values:
                 placeholders = ",".join(["?" for field in row])
                 statement = f"INSERT INTO {table}{column_names} VALUES({placeholders})"
-                c.execute(statement, row)            
+                c.execute(statement, row)
 
     def random_line(self, header, table, conditions=None, splitter=","):
         """ Chooses a random line from the table under the header.
@@ -244,7 +244,7 @@ class Database(object):
                     line = random.choice(ids)
                     line = self.get_field(line, header, table)
             else:
-                c.execute(f"SELECT {header} FROM {table} ORDER BY Random() LIMIT 1")  # TODO: Take categories into account.
+                c.execute(f"SELECT {header} FROM {table} ORDER BY Random() LIMIT 1")
                 line = c.fetchone()[0]
 
         return line
