@@ -26,6 +26,7 @@ class Database(object):
 
     Args:
         dbFile(unicode): The filepath of the database.
+        
     """
     
     def __init__(self, db_file):
@@ -172,6 +173,24 @@ class Database(object):
 
         return ids
 
+    def insert(self, table, values, headers=None):
+        """ Inserts records into the table.
+
+        Args:
+            table(str): Name of table.
+            values(list): List of tuples containing the values to insert.
+                Each tuple represents one row.
+            
+        """
+        table = clean(table)
+        if headers:
+            headers = [clean(h) for h in headers]
+
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            c = connection.cursor()
+
     def random_line(self, header, table, conditions=None, splitter=","):
         """ Chooses a random line from the table under the header.
 
@@ -215,4 +234,3 @@ class Database(object):
                 line = c.fetchone()[0]
 
         return line
-
