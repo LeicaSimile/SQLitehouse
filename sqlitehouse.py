@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
 import random
 import sqlite3
 from contextlib import closing
+
+logger = logging.getLogger(__name__)
 
 def clean(line):
     """ Strip a string of non-alphanumerics (except underscores).
