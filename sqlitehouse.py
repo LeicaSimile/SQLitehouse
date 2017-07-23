@@ -42,6 +42,7 @@ class Database(object):
 
         Returns:
             fields(list): List of fields under header.
+            
         """
         fields = []
         table = clean(table)
@@ -75,6 +76,7 @@ class Database(object):
         Examples:
             >>> get_field(123, "firstname", "kings")
             Adgar
+            
         """
         header = clean(header)
         table = clean(table)
@@ -122,6 +124,7 @@ class Database(object):
             >>> get_ids({"type": "nickname,quip", "by": "Varric"})
             # Any row by "Varric" that has the type "nickname" or "quip".
             [23, 24, 25, 34, 37, 41, 42, 43]
+            
         """
         ids = []
         table = clean(table)
@@ -191,6 +194,16 @@ class Database(object):
         with closing(connection) as connection:
             c = connection.cursor()
 
+            column_names = ""
+            if headers:
+                column_names = ",".join(headers)
+                column_names = f"({column_names})"
+
+            for row in values:
+                placeholders = ",".join(["?" for field in row])
+                statement = f"INSERT INTO {table}{column_names} VALUES({placeholders})"
+                c.execute(statement, row)            
+
     def random_line(self, header, table, conditions=None, splitter=","):
         """ Chooses a random line from the table under the header.
 
@@ -214,6 +227,7 @@ class Database(object):
         Examples:
             >>> random_line("line", {"type": "greeting"})
             Hello.
+            
         """
         header = clean(header)
         table = clean(table)
