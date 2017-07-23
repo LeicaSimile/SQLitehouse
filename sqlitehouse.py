@@ -207,6 +207,8 @@ class Database(object):
                 statement = f"INSERT INTO {table}{column_names} VALUES({placeholders})"
                 c.execute(statement, row)
 
+            connection.commit()
+
     def random_line(self, header, table, conditions=None, splitter=","):
         """ Chooses a random line from the table under the header.
 
