@@ -42,7 +42,12 @@ class Database(object):
         pass
 
     def drop_table(self, table):
-        pass
+        """Deletes a table."""
+        table = clean(table)
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            connection.execute(f"DROP TABLE IF EXISTS {table}")
 
     def insert(self, table, values, columns=None):
         """ Inserts records into the table.
