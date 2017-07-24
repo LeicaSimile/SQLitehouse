@@ -87,7 +87,7 @@ class Database(object):
     def delete(self, table, conditions=None):
         pass
 
-    def create_index(self, table, name, columns):
+    def create_index(self, table, name, columns, unique=False):
         pass
 
     def drop_index(self, name):
