@@ -35,6 +35,59 @@ class Database(object):
     def __init__(self, db_file):
         self.db = db_file
 
+    def create_table(self, name):
+        pass
+
+    def alter_table(self, table):
+        pass
+
+    def drop_table(self, table):
+        pass
+
+    def insert(self, table, values, columns=None):
+        """ Inserts records into the table.
+
+        Args:
+            table(str): Name of table.
+            values(list): List of tuples containing the values to insert.
+                Each tuple represents one row.
+            columns(list, optional): List of column names corresponding to
+                the values being inserted.
+            
+        """
+        table = clean(table)
+        if columns:
+            columns = [clean(h) for h in columns]
+
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            c = connection.cursor()
+
+            column_names = ""
+            if columns:
+                column_names = ",".join(columns)
+                column_names = f"({column_names})"
+
+            for row in values:
+                placeholders = ",".join(["?" for field in row])
+                statement = f"INSERT INTO {table}{column_names} VALUES({placeholders})"
+                c.execute(statement, row)
+
+            connection.commit()
+
+    def update(self, table, conditions=None):
+        pass
+
+    def delete(self, table, conditions=None):
+        pass
+
+    def create_index(self, table, name, columns):
+        pass
+
+    def drop_index(self, name):
+        pass
+
     def get_column(self, column, table, maximum=None):
         """ Gets fields under a column.
 
@@ -178,38 +231,6 @@ class Database(object):
             ids = c.fetchall()
 
         return ids
-
-    def insert(self, table, values, columns=None):
-        """ Inserts records into the table.
-
-        Args:
-            table(str): Name of table.
-            values(list): List of tuples containing the values to insert.
-                Each tuple represents one row.
-            columns(list, optional): List of column names corresponding to
-                the values being inserted.
-            
-        """
-        table = clean(table)
-        if columns:
-            columns = [clean(h) for h in columns]
-
-        connection = sqlite3.connect(self.db)
-
-        with closing(connection) as connection:
-            c = connection.cursor()
-
-            column_names = ""
-            if columns:
-                column_names = ",".join(columns)
-                column_names = f"({column_names})"
-
-            for row in values:
-                placeholders = ",".join(["?" for field in row])
-                statement = f"INSERT INTO {table}{column_names} VALUES({placeholders})"
-                c.execute(statement, row)
-
-            connection.commit()
 
     def random_line(self, column, table, conditions=None, splitter=","):
         """ Chooses a random line from the table under the column.
