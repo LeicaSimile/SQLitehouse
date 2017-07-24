@@ -69,14 +69,14 @@ class Database(object):
         with closing(connection) as connection:
             c = connection.cursor()
 
-            column_names = ""
+            cols = ""
             if columns:
-                column_names = ",".join(columns)
-                column_names = f"({column_names})"
+                cols = ",".join(columns)
+                cols = f"({cols})"
 
             for row in values:
                 placeholders = ",".join(["?" for field in row])
-                statement = f"INSERT INTO {table}{column_names} VALUES({placeholders})"
+                statement = f"INSERT INTO {table}{cols} VALUES({placeholders})"
                 c.execute(statement, row)
 
             connection.commit()
@@ -87,8 +87,26 @@ class Database(object):
     def delete(self, table, conditions=None):
         pass
 
-    def create_index(self, table, name, columns, unique=False):
-        pass
+    def create_index(self, name, table, columns, unique=False):
+        """ Create an index for a table.
+
+        Args:
+            name(str): Name of index.
+            table(str): Table to index.
+            columns(list): List of columns to index.
+            unique(bool, optional): Specify if index is unique or not.
+
+        """
+        name = clean(name)
+        table = clean(table)
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            cols = ",".join([clean(c) for c in columns])
+            u = "UNIQUE " if unique else ""
+            statement = f"CREATE {u}INDEX IF NOT EXISTS {name} ON {table}({cols})"
+
+            connection.execute(statement)
 
     def drop_index(self, name):
         """Deletes an index."""
