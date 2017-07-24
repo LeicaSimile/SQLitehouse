@@ -35,16 +35,16 @@ class Database(object):
     def __init__(self, db_file):
         self.db = db_file
 
-    def get_column(self, header, table, maximum=None):
-        """ Gets fields under a column header.
+    def get_column(self, column, table, maximum=None):
+        """ Gets fields under a column.
 
         Args:
-            header(unicode): Name of column's header.
+            column(unicode): Name of column.
             table(unicode): Name of table.
             maximum(int, optional): Maximum amount of fields to fetch.
 
         Returns:
-            fields(list): List of fields under header.
+            fields(list): List of fields under column.
             
         """
         fields = []
@@ -55,19 +55,19 @@ class Database(object):
             connection.row_factory = lambda cursor, row: row[0]
             c = connection.cursor()
             if maximum:
-                c.execute(f"SELECT {header} FROM {table} LIMIT ?", [maximum])
+                c.execute(f"SELECT {column} FROM {table} LIMIT ?", [maximum])
             else:
-                c.execute(f"SELECT {header} FROM {table}")
+                c.execute(f"SELECT {column} FROM {table}")
             fields = c.fetchall()
         
         return fields
 
-    def get_field(self, field_id, header, table):
-        """ Gets the field under the specified header by its primary key value.
+    def get_field(self, field_id, column, table):
+        """ Gets the field under the specified column by its primary key value.
 
         Args:
             field_id(int, str): Unique ID of line the field is in.
-            header(unicode): Header of the field to fetch.
+            column(unicode): Column of the field to fetch.
             table(unicode): Name of table to look into.
 
         Returns:
@@ -81,7 +81,7 @@ class Database(object):
             Adgar
             
         """
-        header = clean(header)
+        column = clean(column)
         table = clean(table)
         field = None
         
@@ -90,7 +90,7 @@ class Database(object):
         with closing(connection) as connection:
             c = connection.cursor()
 
-            statement = f"SELECT {header} FROM {table} WHERE id=?"
+            statement = f"SELECT {column} FROM {table} WHERE id=?"
             logger.debug(statement)
             c.execute(statement, [field_id])
 
@@ -109,15 +109,15 @@ class Database(object):
         Args:
             table(unicode): Name of table to look into.
             conditions(list, optional): Categories you want to filter the line by:
-                {"header of categories 1": "category1,category2",
-                 "header of category 2": "category3"}
-                Multiple categories under a single header are separated with a comma.
+                {"column of categories 1": "category1,category2",
+                 "column of category 2": "category3"}
+                Multiple categories under a single column are separated with a comma.
 
         Returns:
             ids(list): List of IDs that match the categories.
 
         Raises:
-            OperationalError: If table or header doesn't exist.
+            OperationalError: If table or column doesn't exist.
             TypeError: If category is neither None nor a dictionary.
 
         Examples:
@@ -144,11 +144,11 @@ class Database(object):
                 clause_list = [clause,]
                 substitutes = []
                 cat_count = 1
-                header_count = 1
+                column_count = 1
 
                 ## TODO: Add ability to specify comparison operator (e.g. =, <, LIKE, etc.)
                 for con in conditions:
-                    if 1 < header_count:
+                    if 1 < column_count:
                         clause_list.append(" AND (")
 
                     sub_count = 1
@@ -162,7 +162,7 @@ class Database(object):
                         sub_count += 2
                         
                     clause_list.append(")")
-                    header_count += 2
+                    column_count += 2
                     cat_count = 1
 
                 clause = "".join(clause_list)
@@ -179,18 +179,20 @@ class Database(object):
 
         return ids
 
-    def insert(self, table, values, headers=None):
+    def insert(self, table, values, columns=None):
         """ Inserts records into the table.
 
         Args:
             table(str): Name of table.
             values(list): List of tuples containing the values to insert.
                 Each tuple represents one row.
+            columns(list, optional): List of column names corresponding to
+                the values being inserted.
             
         """
         table = clean(table)
-        if headers:
-            headers = [clean(h) for h in headers]
+        if columns:
+            columns = [clean(h) for h in columns]
 
         connection = sqlite3.connect(self.db)
 
@@ -198,8 +200,8 @@ class Database(object):
             c = connection.cursor()
 
             column_names = ""
-            if headers:
-                column_names = ",".join(headers)
+            if columns:
+                column_names = ",".join(columns)
                 column_names = f"({column_names})"
 
             for row in values:
@@ -209,16 +211,16 @@ class Database(object):
 
             connection.commit()
 
-    def random_line(self, header, table, conditions=None, splitter=","):
-        """ Chooses a random line from the table under the header.
+    def random_line(self, column, table, conditions=None, splitter=","):
+        """ Chooses a random line from the table under the column.
 
         Args:
-            header(unicode): The header of the random line's column.
+            column(unicode): The name of the random line's column.
             table(unicode): Name of the table to look into.
             conditions(dict, optional): Categories to filter the line by:
-                {"header of categories 1": "category1,category2",
-                 "header of category 2": "category3"}
-                Multiple categories under a single header are separated with a comma.
+                {"column of categories 1": "category1,category2",
+                 "column of category 2": "category3"}
+                Multiple categories under a single column are separated with a comma.
             splitter(unicode, optional): What separates multiple categories
                 (default is a comma).
 
@@ -226,7 +228,7 @@ class Database(object):
             line(unicode): A random line from the database.
 
         Raises:
-            OperationalError: If header or table doesn't exist.
+            OperationalError: If column or table doesn't exist.
             TypeError: If category is neither None nor a dictionary.
 
         Examples:
@@ -234,7 +236,7 @@ class Database(object):
             Hello.
             
         """
-        header = clean(header)
+        column = clean(column)
         table = clean(table)
         line = ""
         
@@ -247,9 +249,9 @@ class Database(object):
                 ids = self.get_ids(table, conditions, splitter)
                 if ids:
                     line = random.choice(ids)
-                    line = self.get_field(line, header, table)
+                    line = self.get_field(line, column, table)
             else:
-                c.execute(f"SELECT {header} FROM {table} ORDER BY Random() LIMIT 1")
+                c.execute(f"SELECT {column} FROM {table} ORDER BY Random() LIMIT 1")
                 line = c.fetchone()[0]
 
         return line
