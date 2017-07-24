@@ -91,7 +91,12 @@ class Database(object):
         pass
 
     def drop_index(self, name):
-        pass
+        """Deletes an index."""
+        name = clean(name)
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            connection.execute(f"DROP INDEX IF EXISTS {name}")
 
     def get_column(self, column, table, maximum=None):
         """ Gets fields under a column.
