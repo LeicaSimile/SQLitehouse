@@ -24,6 +24,15 @@ def clean(line):
     return "".join(char for char in line if (char.isalnum() or "_" == char))
 
 
+class TableColumn(object):
+    """Represents a column in a database table."""
+
+    def __init__(self, name, datatype, primary_key=False,
+                 autoincrement=False, allow_null=True):
+        self.name = name
+        self.datatype = datatype
+    
+
 class Database(object):
     """ For reading and writing records in a SQLite database.
 
