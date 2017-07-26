@@ -52,6 +52,15 @@ class Database(object):
     def create_table(self, name, columns):
         pass
 
+    def rename_table(self, table, new_name):
+        """Renames a table."""
+        table = clean(table)
+        new_name = clean(new_name)
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            connection.execute(f"ALTER TABLE {table} RENAME TO {new_name}")
+
     def drop_table(self, table):
         """Deletes a table."""
         table = clean(table)
