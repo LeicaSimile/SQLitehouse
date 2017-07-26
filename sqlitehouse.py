@@ -70,6 +70,9 @@ class Database(object):
         with closing(connection) as connection:
             connection.execute(f"ALTER TABLE {table} RENAME TO {new_name}")
 
+    def add_column(self, table, column):
+        pass
+
     def drop_table(self, table):
         """Deletes a table."""
         table = clean(table)
