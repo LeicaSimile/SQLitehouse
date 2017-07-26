@@ -35,10 +35,21 @@ class Database(object):
     def __init__(self, db_file):
         self.db = db_file
 
-    def create_table(self, name):
-        pass
+    def execute(self, statement, substitutes=None):
+        """Executes a statement."""
+        connection = sqlite3.connect(self.db)
+        
+        with closing(connection) as connection:
+            c = connection.cursor()
+            
+            if substitutes:
+                c.execute(statement, substitutes)
+            else:
+                c.execute(statement)
 
-    def alter_table(self, table):
+            connection.commit()
+
+    def create_table(self, name, columns):
         pass
 
     def drop_table(self, table):
