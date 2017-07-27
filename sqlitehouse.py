@@ -11,10 +11,10 @@ def clean(line):
     Can use to clean strings before using them in a database query.
 
     Args:
-        line(unicode): String to clean.
+        line(str): String to clean.
 
     Returns:
-        line(unicode): A string safe to use in a database query.
+        line(str): A string safe to use in a database query.
 
     Examples:
         >>> clean("Robert'); DROP TABLE Students;")
@@ -37,7 +37,7 @@ class Database(object):
     """ For reading and writing records in a SQLite database.
 
     Args:
-        dbFile(unicode): The filepath of the database.
+        dbFile(str): The filepath of the database.
         
     """
     
@@ -152,8 +152,8 @@ class Database(object):
         """ Gets fields under a column.
 
         Args:
-            column(unicode): Name of column.
-            table(unicode): Name of table.
+            column(str): Name of column.
+            table(str): Name of table.
             maximum(int, optional): Maximum amount of fields to fetch.
 
         Returns:
@@ -180,8 +180,8 @@ class Database(object):
 
         Args:
             field_id(int, str): Unique ID of line the field is in.
-            column(unicode): Column of the field to fetch.
-            table(unicode): Name of table to look into.
+            column(str): Column of the field to fetch.
+            table(str): Name of table to look into.
 
         Returns:
             The desired field, or None if the lookup failed.
@@ -220,7 +220,7 @@ class Database(object):
         Gets all IDs if conditions is None.
 
         Args:
-            table(unicode): Name of table to look into.
+            table(str): Name of table to look into.
             conditions(list, optional): Categories you want to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
@@ -296,17 +296,17 @@ class Database(object):
         """ Chooses a random line from the table under the column.
 
         Args:
-            column(unicode): The name of the random line's column.
-            table(unicode): Name of the table to look into.
+            column(str): The name of the random line's column.
+            table(str): Name of the table to look into.
             conditions(dict, optional): Categories to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
-            splitter(unicode, optional): What separates multiple categories
+            splitter(str, optional): What separates multiple categories
                 (default is a comma).
 
         Returns:
-            line(unicode): A random line from the database.
+            line(str): A random line from the database.
 
         Raises:
             OperationalError: If column or table doesn't exist.
