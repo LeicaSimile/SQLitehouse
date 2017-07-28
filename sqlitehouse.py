@@ -25,12 +25,28 @@ def clean(line):
 
 
 class TableColumn(object):
-    """Represents a column in a database table."""
+    """Represents a column in a database table.
 
-    def __init__(self, name, datatype, primary_key=False,
-                 autoincrement=False, allow_null=True):
+    Args:
+        name (str): Name of the column.
+        datatype (str): Data type the column contains.
+
+    Kwargs:
+        primary_key (bool, optional): Specifies if the column is the primary
+            key or not. Defaults to False.
+        allow_null (bool, optional): Whether fields may have null values or
+            not. Defaults to True.
+        unique (bool, optional): Specifies if column fields must be unique.
+            Defaults to False.
+
+    """
+
+    def __init__(self, name, datatype, **constraints):
         self.name = name
         self.datatype = datatype
+        self.primary_key = constraints.get("primary_key", False)
+        self.allow_null = contraints.get("allow_null", True)
+        self.unique = constraints.get("unique", False)
     
 
 class Database(object):
