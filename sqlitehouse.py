@@ -42,7 +42,7 @@ class TableColumn(object):
     """
 
     def __init__(self, name, datatype, **constraints):
-        self.name = name
+        self.name = clean(name)
         self.datatype = datatype
         self.primary_key = constraints.get("primary_key", False)
         self.allow_null = contraints.get("allow_null", True)
