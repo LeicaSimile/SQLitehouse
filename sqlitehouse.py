@@ -75,7 +75,14 @@ class Database(object):
             connection.commit()
 
     def create_table(self, name, columns):
-        pass
+        """Creates a table.
+
+        Args:
+            name (str): Name of table.
+            columns (list): List of TableColumns.
+
+        """
+        connection = sqlite3.connect(self.db)
 
     def rename_table(self, table, new_name):
         """Renames a table."""
