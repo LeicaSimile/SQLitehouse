@@ -91,7 +91,12 @@ class Database(object):
                 null = " NOT NULL" if not col.allow_null else ""
                 unique = " UNIQUE" if col.unique else ""
                 column = f"{col.name} {col.type}{pk}{null}{unique}"
-            statement.append(col)
+        
+                statement.append(col)
+
+            
+
+            
 
     def rename_table(self, table, new_name):
         """Renames a table."""
