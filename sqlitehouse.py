@@ -83,20 +83,21 @@ class Database(object):
 
         """
         connection = sqlite3.connect(self.db)
-        statement = []
-
+        name = clean(name)
+        statement = [f"CREATE TABLE {name}(",]
+        
         with closing(connection) as connection:
             for col in columns:
                 pk = " PRIMARY KEY" if col.primary_key else ""
                 null = " NOT NULL" if not col.allow_null else ""
                 unique = " UNIQUE" if col.unique else ""
-                column = f"{col.name} {col.type}{pk}{null}{unique}"
+                column = f"{col.name} {col.type}{pk}{null}{unique},"
         
                 statement.append(col)
 
-            
-
-            
+            statement.append(");")
+            statement = "\n".join(statement)
+            c.execute(statement)
 
     def rename_table(self, table, new_name):
         """Renames a table."""
