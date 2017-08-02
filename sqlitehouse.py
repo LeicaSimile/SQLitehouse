@@ -84,16 +84,22 @@ class Database(object):
         """
         connection = sqlite3.connect(self.db)
         name = clean(name)
-        statement = [f"CREATE TABLE {name}(",]
+        statement = [f"CREATE TABLE `{name}`(",]
         
         with closing(connection) as connection:
+            i = 1
             for col in columns:
                 pk = " PRIMARY KEY" if col.primary_key else ""
                 null = " NOT NULL" if not col.allow_null else ""
                 unique = " UNIQUE" if col.unique else ""
-                column = f"{col.name} {col.type}{pk}{null}{unique},"
-        
-                statement.append(col)
+
+                if len(columns) > i:
+                    column = f"`{col.name}` {col.datatype}{pk}{null}{unique},"
+                else:
+                    column = f"`{col.name}` {col.datatype}{pk}{null}{unique}"
+
+                statement.append(column)
+                i += 1
 
             statement.append(");")
             statement = "\n".join(statement)
