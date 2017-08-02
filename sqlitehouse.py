@@ -45,7 +45,7 @@ class TableColumn(object):
         self.name = clean(name)
         self.datatype = datatype
         self.primary_key = constraints.get("primary_key", False)
-        self.allow_null = contraints.get("allow_null", True)
+        self.allow_null = constraints.get("allow_null", True)
         self.unique = constraints.get("unique", False)
     
 
@@ -97,7 +97,7 @@ class Database(object):
 
             statement.append(");")
             statement = "\n".join(statement)
-            c.execute(statement)
+            connection.execute(statement)
 
     def rename_table(self, table, new_name):
         """Renames a table."""
