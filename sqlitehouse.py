@@ -115,7 +115,16 @@ class Database(object):
             connection.execute(f"ALTER TABLE {table} RENAME TO {new_name}")
 
     def add_column(self, table, column):
-        pass
+        """Adds a column to a table."""
+        connection = sqlite3.connect(self.db)
+        table = clean(table)
+
+        with closing(connection) as connection:
+            null = " NOT NULL" if not col.allow_null else ""
+            unique = " UNIQUE" if col.unique else ""                
+            col = f"`{column.name}` {column.datatype}{null}{unique}"
+            
+            connection.execute(f"ALTER TABLE {table} ADD COLUMN {col}")
 
     def drop_table(self, table):
         """Deletes a table."""
