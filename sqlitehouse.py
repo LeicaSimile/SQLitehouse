@@ -170,7 +170,12 @@ class Database(object):
         pass
 
     def delete(self, table, conditions=None):
-        pass
+        """Deletes a record from a table."""
+        table = clean(table)
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            pass
 
     def create_index(self, name, table, columns, unique=False):
         """ Create an index for a table.
