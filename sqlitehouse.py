@@ -60,6 +60,37 @@ class Database(object):
     def __init__(self, db_file):
         self.db = db_file
 
+    def _get_conditions(self, conditions):
+        """Returns a WHERE clause according to given conditions."""
+        clause = "WHERE ("
+        clause_list = [clause,]
+        substitutes = []
+        cat_count = 1
+        column_count = 1
+
+        ## TODO: Add ability to specify comparison operator (e.g. =, <, LIKE, etc.)
+        for con in conditions:
+            if 1 < column_count:
+                clause_list.append(" AND (")
+
+            sub_count = 1
+            subconditions = conditions[con].split(splitter)
+            for sub in subconditions:
+                if 1 < sub_count:
+                    clause_list.append(" OR ")
+                
+                clause_list.append(f"{clean(con)}=?")
+                substitutes.append(sub)
+                sub_count += 2
+                
+            clause_list.append(")")
+            column_count += 2
+            cat_count = 1
+
+        clause = "".join(clause_list)
+
+        return clause
+
     def execute(self, statement, substitutes=None):
         """Executes a statement."""
         connection = sqlite3.connect(self.db)
