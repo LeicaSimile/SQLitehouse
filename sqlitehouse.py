@@ -61,7 +61,14 @@ class Database(object):
         self.db = db_file
 
     def _get_conditions(self, conditions):
-        """Returns a WHERE clause according to given conditions."""
+        """ Returns a WHERE clause according to given conditions.
+
+        Args:
+            conditions(dict):
+
+        Returns:
+            clause(tuple): The string statement and the substitutes for ? placeholders.
+        """
         clause = "WHERE ("
         clause_list = [clause,]
         substitutes = []
@@ -89,7 +96,7 @@ class Database(object):
 
         clause = "".join(clause_list)
 
-        return clause
+        return (clause, substitutes)
 
     def execute(self, statement, substitutes=None):
         """Executes a statement."""
@@ -342,36 +349,11 @@ class Database(object):
             c = connection.cursor()
 
             if conditions:
-                clause = "WHERE ("
-                clause_list = [clause,]
-                substitutes = []
-                cat_count = 1
-                column_count = 1
-
-                ## TODO: Add ability to specify comparison operator (e.g. =, <, LIKE, etc.)
-                for con in conditions:
-                    if 1 < column_count:
-                        clause_list.append(" AND (")
-
-                    sub_count = 1
-                    subconditions = conditions[con].split(splitter)
-                    for sub in subconditions:
-                        if 1 < sub_count:
-                            clause_list.append(" OR ")
-                        
-                        clause_list.append(f"{clean(con)}=?")
-                        substitutes.append(sub)
-                        sub_count += 2
-                        
-                    clause_list.append(")")
-                    column_count += 2
-                    cat_count = 1
-
-                clause = "".join(clause_list)
+                clause, substitutes = self._get_conditions(conditions)
 
                 statement = f"SELECT id FROM {table} {clause}"
-                logger.debug(f"(get_ids) Substitutes: {substitutes}")
                 logger.debug(f"(get_ids) SQLite statement: {statement}")
+                logger.debug(f"(get_ids) Substitutes: {substitutes}")
 
                 c.execute(statement, substitutes)
             else:
