@@ -213,7 +213,16 @@ class Database(object):
         connection = sqlite3.connect(self.db)
 
         with closing(connection) as connection:
-            pass
+            c = connection.cursor()
+            
+            if conditions:
+                where, substitutes = self._get_conditions(conditions)
+                statement = f"DELETE FROM {table} WHERE {conditions}"
+                c.execute(statement, substitutes)
+            else:
+                c.execute(f"DELETE FROM {table}")
+
+            connection.commit()
 
     def create_index(self, name, table, columns, unique=False):
         """ Create an index for a table.
