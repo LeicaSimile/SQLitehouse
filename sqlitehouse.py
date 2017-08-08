@@ -208,7 +208,7 @@ class Database(object):
         pass
 
     def delete(self, table, conditions=None):
-        """Deletes a record from a table."""
+        """Deletes records from a table."""
         table = clean(table)
         connection = sqlite3.connect(self.db)
 
@@ -217,7 +217,7 @@ class Database(object):
             
             if conditions:
                 where, substitutes = self._get_conditions(conditions)
-                statement = f"DELETE FROM {table} WHERE {conditions}"
+                statement = f"DELETE FROM {table} {conditions}"
                 c.execute(statement, substitutes)
             else:
                 c.execute(f"DELETE FROM {table}")
