@@ -204,8 +204,28 @@ class Database(object):
 
             connection.commit()
 
-    def update(self, table, conditions=None):
-        pass
+    def update(self, table, new_values, conditions=None):
+        """Updates records on a table.
+
+        Args:
+            table(str): Name of the table.
+            new_values(dict): The new values in each column. e.g.
+                {"column1": "new1", "column2": "new2"}
+            conditions(dict, optional): Categories to filter the update by:
+                {"column of categories 1": "category1,category2",
+                 "column of category 2": "category3"}
+                Multiple categories under a single column are separated with a comma.
+
+        """
+        table = clean(table)
+        connection = sqlite3.connect(self.db)
+
+        with closing(connection) as connection:
+            where = ""
+            if conditions:
+                where, substitutes = self._get_conditions(conditions)
+
+            statement = f"UPDATE {table} SET"            
 
     def delete(self, table, conditions=None):
         """Deletes records from a table."""
