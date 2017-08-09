@@ -346,7 +346,7 @@ class Database(object):
 
         Args:
             table(str): Name of table to look into.
-            conditions(list, optional): Categories you want to filter the line by:
+            conditions(dict, optional): Categories you want to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
