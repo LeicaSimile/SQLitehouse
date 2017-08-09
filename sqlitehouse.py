@@ -60,7 +60,7 @@ class Database(object):
     def __init__(self, db_file):
         self.db = db_file
 
-    def _get_conditions(self, conditions):
+    def _get_conditions(self, conditions, splitter=","):
         """ Returns a WHERE clause according to given conditions.
 
         Args:
