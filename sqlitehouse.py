@@ -221,11 +221,26 @@ class Database(object):
         connection = sqlite3.connect(self.db)
 
         with closing(connection) as connection:
+            c = connection.cursor()
+            
+            to_update = []
+            substitutes = []
+            for column in new_values:
+                to_update.append(f"{column} = ?")
+                substitutes.append(new_values[column])
+
+            to_update = ", ".join(to_update)
+
             where = ""
             if conditions:
-                where, substitutes = self._get_conditions(conditions)
+                where, where_subs = self._get_conditions(conditions)
+                substitutes = [*substitutes, *where_subs]
 
-            statement = f"UPDATE {table} SET"            
+            statement = f"UPDATE {table} SET {to_update} {where}"
+            print(statement, substitutes)
+            c.execute(statement, substitutes)
+
+            connection.commit()
 
     def delete(self, table, conditions=None):
         """Deletes records from a table."""
