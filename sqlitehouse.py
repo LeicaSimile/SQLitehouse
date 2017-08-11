@@ -60,7 +60,7 @@ class Database(object):
     def __init__(self, db_file):
         self.db = db_file
 
-    def _get_conditions(self, conditions, splitter=","):
+    def _get_conditions(self, conditions, delimiter=","):
         """Returns a WHERE clause according to given conditions.
 
         Args:
@@ -81,7 +81,7 @@ class Database(object):
                 clause_list.append(" AND (")
 
             sub_count = 1
-            subconditions = conditions[con].split(splitter)
+            subconditions = conditions[con].split(delimiter)
             for sub in subconditions:
                 if 1 < sub_count:
                     clause_list.append(" OR ")
@@ -360,7 +360,7 @@ class Database(object):
         
         return field
 
-    def get_ids(self, table, conditions=None, splitter=","):
+    def get_ids(self, table, column_id="id", conditions=None, delimiter=","):
         """Gets the IDs that fit within the specified conditions.
 
         Gets all IDs if conditions is None.
@@ -390,6 +390,7 @@ class Database(object):
         """
         ids = []
         table = clean(table)
+        column_id = clean(column_id)
         clause = ""
         
         connection = sqlite3.connect(self.db)
@@ -401,29 +402,30 @@ class Database(object):
             if conditions:
                 clause, substitutes = self._get_conditions(conditions)
 
-                statement = f"SELECT id FROM {table} {clause}"
+                statement = f"SELECT \"{column_id}\" FROM \"{table}\" {clause}"
                 logger.debug(f"(get_ids) SQLite statement: {statement}")
                 logger.debug(f"(get_ids) Substitutes: {substitutes}")
 
                 c.execute(statement, substitutes)
             else:
-                c.execute(f"SELECT id FROM {table}")
+                c.execute(f"SELECT \"{column_id}\" FROM \"{table}\"")
 
             ids = c.fetchall()
 
         return ids
 
-    def random_line(self, column, table, conditions=None, splitter=","):
+    def random_line(self, column, table, column_id="id", conditions=None, delimiter=","):
         """Chooses a random line from the table under the column.
 
         Args:
             column (str): The name of the random line's column.
             table (str): Name of the table to look into.
+            column_id (str, optional): Name of the id column. Default is "id".
             conditions (dict, optional): Categories to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
-            splitter (str, optional): What separates multiple categories
+            delimiter (str, optional): What separates multiple categories
                 (default is a comma).
 
         Returns:
@@ -440,6 +442,7 @@ class Database(object):
         """
         column = clean(column)
         table = clean(table)
+        column_id = clean(column_id)
         line = ""
         
         connection = sqlite3.connect(self.db)
@@ -448,7 +451,7 @@ class Database(object):
             c = connection.cursor()
 
             if conditions:
-                ids = self.get_ids(table, conditions, splitter)
+                ids = self.get_ids(table, column_id, conditions, delimiter)
                 if ids:
                     line = random.choice(ids)
                     line = self.get_field(line, column, table)
