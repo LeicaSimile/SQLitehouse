@@ -7,14 +7,14 @@ from contextlib import closing
 logger = logging.getLogger(__name__)
 
 def clean(line):
-    """ Strip a string of non-alphanumerics (except underscores).
+    """Strip a string of non-alphanumerics (except underscores).
     Can use to clean strings before using them in a database query.
 
     Args:
-        line(str): String to clean.
+        line (str): String to clean.
 
     Returns:
-        line(str): A string safe to use in a database query.
+        line (str): A string safe to use in a database query.
 
     Examples:
         >>> clean("Robert'); DROP TABLE Students;")
@@ -50,10 +50,10 @@ class TableColumn(object):
     
 
 class Database(object):
-    """ For reading and writing records in a SQLite database.
+    """For reading and writing records in a SQLite database.
 
     Args:
-        dbFile(str): The filepath of the database.
+        dbFile (str): The filepath of the database.
         
     """
     
@@ -61,13 +61,13 @@ class Database(object):
         self.db = db_file
 
     def _get_conditions(self, conditions, splitter=","):
-        """ Returns a WHERE clause according to given conditions.
+        """Returns a WHERE clause according to given conditions.
 
         Args:
-            conditions(dict):
+            conditions (dict):
 
         Returns:
-            clause(tuple): The string statement and the substitutes for ? placeholders.
+            clause (tuple): The string statement and the substitutes for ? placeholders.
         """
         clause = "WHERE ("
         clause_list = [clause,]
@@ -99,7 +99,13 @@ class Database(object):
         return (clause, substitutes)
 
     def execute(self, statement, substitutes=None):
-        """Executes a statement."""
+        """Executes a statement.
+
+        Args:
+            statement (str): Statement to execute.
+            substitutes (list): Values to substitute placeholders in statement.
+
+        """
         connection = sqlite3.connect(self.db)
         
         with closing(connection) as connection:
@@ -173,13 +179,13 @@ class Database(object):
             connection.execute(f"DROP TABLE IF EXISTS {table}")
 
     def insert(self, table, values, columns=None):
-        """ Inserts records into the table.
+        """Inserts records into the table.
 
         Args:
-            table(str): Name of table.
-            values(list): List of tuples containing the values to insert.
+            table (str): Name of table.
+            values (list): List of tuples containing the values to insert.
                 Each tuple represents one row.
-            columns(list, optional): List of column names corresponding to
+            columns (list, optional): List of column names corresponding to
                 the values being inserted.
             
         """
@@ -208,10 +214,10 @@ class Database(object):
         """Updates records on a table.
 
         Args:
-            table(str): Name of the table.
-            new_values(dict): The new values in each column. e.g.
+            table (str): Name of the table.
+            new_values (dict): The new values in each column. e.g.
                 {"column1": "new1", "column2": "new2"}
-            conditions(dict, optional): Categories to filter the update by:
+            conditions (dict, optional): Categories to filter the update by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
@@ -260,13 +266,13 @@ class Database(object):
             connection.commit()
 
     def create_index(self, name, table, columns, unique=False):
-        """ Create an index for a table.
+        """Create an index for a table.
 
         Args:
-            name(str): Name of index.
-            table(str): Table to index.
-            columns(list): List of columns to index.
-            unique(bool, optional): Specify if index is unique or not.
+            name (str): Name of index.
+            table (str): Table to index.
+            columns (list): List of columns to index.
+            unique (bool, optional): Specify if index is unique or not.
 
         """
         name = clean(name)
@@ -289,15 +295,15 @@ class Database(object):
             connection.execute(f"DROP INDEX IF EXISTS {name}")
 
     def get_column(self, column, table, maximum=None):
-        """ Gets fields under a column.
+        """Gets fields under a column.
 
         Args:
-            column(str): Name of column.
-            table(str): Name of table.
-            maximum(int, optional): Maximum amount of fields to fetch.
+            column (str): Name of column.
+            table (str): Name of table.
+            maximum (int, optional): Maximum amount of fields to fetch.
 
         Returns:
-            fields(list): List of fields under column.
+            fields (list): List of fields under column.
             
         """
         fields = []
@@ -316,12 +322,12 @@ class Database(object):
         return fields
 
     def get_field(self, field_id, column, table):
-        """ Gets the field under the specified column by its primary key value.
+        """Gets the field under the specified column by its primary key value.
 
         Args:
-            field_id(int, str): Unique ID of line the field is in.
-            column(str): Column of the field to fetch.
-            table(str): Name of table to look into.
+            field_id (int, str): Unique ID of line the field is in.
+            column (str): Column of the field to fetch.
+            table (str): Name of table to look into.
 
         Returns:
             The desired field, or None if the lookup failed.
@@ -355,19 +361,19 @@ class Database(object):
         return field
 
     def get_ids(self, table, conditions=None, splitter=","):
-        """ Gets the IDs that fit within the specified conditions.
+        """Gets the IDs that fit within the specified conditions.
 
         Gets all IDs if conditions is None.
 
         Args:
-            table(str): Name of table to look into.
-            conditions(dict, optional): Categories you want to filter the line by:
+            table (str): Name of table to look into.
+            conditions (dict, optional): Categories you want to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
 
         Returns:
-            ids(list): List of IDs that match the categories.
+            ids (list): List of IDs that match the categories.
 
         Raises:
             OperationalError: If table or column doesn't exist.
@@ -408,16 +414,16 @@ class Database(object):
         return ids
 
     def random_line(self, column, table, conditions=None, splitter=","):
-        """ Chooses a random line from the table under the column.
+        """Chooses a random line from the table under the column.
 
         Args:
-            column(str): The name of the random line's column.
-            table(str): Name of the table to look into.
-            conditions(dict, optional): Categories to filter the line by:
+            column (str): The name of the random line's column.
+            table (str): Name of the table to look into.
+            conditions (dict, optional): Categories to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
-            splitter(str, optional): What separates multiple categories
+            splitter (str, optional): What separates multiple categories
                 (default is a comma).
 
         Returns:
