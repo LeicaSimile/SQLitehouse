@@ -138,7 +138,7 @@ class Database(object):
         """
         connection = sqlite3.connect(self.db)
         name = clean(name)
-        statement = [f"CREATE TABLE `{name}`(",]
+        statement = [f"CREATE TABLE \"{name}\"(",]
         
         with closing(connection) as connection:
             i = 1
@@ -148,9 +148,9 @@ class Database(object):
                 unique = " UNIQUE" if col.unique else ""
 
                 if len(columns) > i:
-                    column = f"`{col.name}` {col.datatype}{pk}{null}{unique},"
+                    column = f"\"{col.name}\" {col.datatype}{pk}{null}{unique},"
                 else:
-                    column = f"`{col.name}` {col.datatype}{pk}{null}{unique}"
+                    column = f"\"{col.name}\" {col.datatype}{pk}{null}{unique}"
 
                 statement.append(column)
                 i += 1
@@ -166,7 +166,7 @@ class Database(object):
         connection = sqlite3.connect(self.db)
 
         with closing(connection) as connection:
-            connection.execute(f"ALTER TABLE {table} RENAME TO {new_name}")
+            connection.execute(f"ALTER TABLE \"{table}\" RENAME TO \"{new_name}\"")
 
     def add_column(self, table, column):
         """Adds a column to a table."""
@@ -176,9 +176,9 @@ class Database(object):
         with closing(connection) as connection:
             null = " NOT NULL" if not col.allow_null else ""
             unique = " UNIQUE" if col.unique else ""                
-            col = f"`{column.name}` {column.datatype}{null}{unique}"
+            col = f"\"{column.name}\" {column.datatype}{null}{unique}"
             
-            connection.execute(f"ALTER TABLE {table} ADD COLUMN {col}")
+            connection.execute(f"ALTER TABLE \"{table}\" ADD COLUMN \"{col}\"")
 
     def drop_table(self, table):
         """Deletes a table."""
@@ -186,7 +186,7 @@ class Database(object):
         connection = sqlite3.connect(self.db)
 
         with closing(connection) as connection:
-            connection.execute(f"DROP TABLE IF EXISTS {table}")
+            connection.execute(f"DROP TABLE IF EXISTS \"{table}\"")
 
     def insert(self, table, values, columns=None):
         """Inserts records into the table.
@@ -215,7 +215,7 @@ class Database(object):
 
             for row in values:
                 placeholders = ",".join(["?" for field in row])
-                statement = f"INSERT INTO {table}{cols} VALUES({placeholders})"
+                statement = f"INSERT INTO \"{table}\"{cols} VALUES({placeholders})"
                 c.execute(statement, row)
 
             connection.commit()
@@ -242,7 +242,7 @@ class Database(object):
             to_update = []
             substitutes = []
             for column in new_values:
-                to_update.append(f"{column} = ?")
+                to_update.append(f"\"{column}\" = ?")
                 substitutes.append(new_values[column])
 
             to_update = ", ".join(to_update)
@@ -252,7 +252,7 @@ class Database(object):
                 where, where_subs = self._get_conditions(conditions)
                 substitutes = [*substitutes, *where_subs]
 
-            statement = f"UPDATE {table} SET {to_update} {where}"
+            statement = f"UPDATE \"{table}\" SET {to_update} {where}"
             print(statement, substitutes)
             c.execute(statement, substitutes)
 
@@ -268,10 +268,10 @@ class Database(object):
             
             if conditions:
                 where, substitutes = self._get_conditions(conditions)
-                statement = f"DELETE FROM {table} {conditions}"
+                statement = f"DELETE FROM \"{table}\" {conditions}"
                 c.execute(statement, substitutes)
             else:
-                c.execute(f"DELETE FROM {table}")
+                c.execute(f"DELETE FROM \"{table}\"")
 
             connection.commit()
 
@@ -292,7 +292,7 @@ class Database(object):
         with closing(connection) as connection:
             cols = ",".join([clean(c) for c in columns])
             u = "UNIQUE " if unique else ""
-            statement = f"CREATE {u}INDEX IF NOT EXISTS {name} ON {table}({cols})"
+            statement = f"CREATE {u}INDEX IF NOT EXISTS {name} ON \"{table}\"({cols})"
 
             connection.execute(statement)
 
@@ -302,7 +302,7 @@ class Database(object):
         connection = sqlite3.connect(self.db)
 
         with closing(connection) as connection:
-            connection.execute(f"DROP INDEX IF EXISTS {name}")
+            connection.execute(f"DROP INDEX IF EXISTS \"{name}\"")
 
     def get_column(self, column, table, maximum=None):
         """Gets fields under a column.
@@ -324,9 +324,9 @@ class Database(object):
             connection.row_factory = lambda cursor, row: row[0]
             c = connection.cursor()
             if maximum:
-                c.execute(f"SELECT {column} FROM {table} LIMIT ?", [maximum])
+                c.execute(f"SELECT \"{column}\" FROM \"{table}\" LIMIT ?", [maximum])
             else:
-                c.execute(f"SELECT {column} FROM {table}")
+                c.execute(f"SELECT \"{column}\" FROM \"{table}\"")
             fields = c.fetchall()
         
         return fields
@@ -359,7 +359,7 @@ class Database(object):
         with closing(connection) as connection:
             c = connection.cursor()
 
-            statement = f"SELECT {column} FROM {table} WHERE id=?"
+            statement = f"SELECT \"{column}\" FROM \"{table}\" WHERE id=?"
             logger.debug(statement)
             c.execute(statement, [field_id])
 
@@ -469,7 +469,7 @@ class Database(object):
                     line = random.choice(ids)
                     line = self.get_field(line, column, table)
             else:
-                c.execute(f"SELECT {column} FROM {table} ORDER BY Random() LIMIT 1")
+                c.execute(f"SELECT \"{column}\" FROM \"{table}\" ORDER BY Random() LIMIT 1")
                 line = c.fetchone()[0]
 
         return line
