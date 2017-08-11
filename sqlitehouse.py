@@ -377,11 +377,14 @@ class Database(object):
 
         Args:
             table (str): Name of table to look into.
+            column_id (str, optional): Name of the id column. Default is "id".
             conditions (dict, optional): Categories you want to filter the line by:
                 {"column of categories 1": "category1,category2",
                  "column of category 2": "category3"}
                 Multiple categories under a single column are separated with a comma.
-
+            delimiter (str, optional): Delimiter of column values for conditions.
+                Default is a comma.
+            
         Returns:
             ids (list): List of IDs that match the categories.
 
