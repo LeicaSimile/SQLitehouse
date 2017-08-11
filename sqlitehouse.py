@@ -64,10 +64,20 @@ class Database(object):
         """Returns a WHERE clause according to given conditions.
 
         Args:
-            conditions (dict):
+            conditions (dict): Conditions you want to filter the search by:
+                {"column1": "value1,value2",
+                 "column2": "value3"}
+                Multiple conditions under a single column are separated with the delimiter.
+            delimiter (str, optional): Delimiter of column values for conditions.
+                Default is a comma.
 
         Returns:
             clause (tuple): The string statement and the substitutes for ? placeholders.
+
+        Examples:
+            >>> db._get_conditions({"colour": "green", "food": "eggs,ham"})
+            ('WHERE (colour=?) AND (food=? OR food=?)', ["green", "eggs", "ham"])
+        
         """
         clause = "WHERE ("
         clause_list = [clause,]
