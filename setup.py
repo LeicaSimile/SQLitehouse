@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name="sqlitehouse",
-      version="1.1",
+      version="1.2",
       description="Simple library for reading/writing records in a SQLite database.",
       author="Tumthe3",
       author_email="tumthe3@gmail.com",
