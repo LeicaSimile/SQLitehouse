@@ -138,7 +138,7 @@ class Database(object):
         """
         connection = sqlite3.connect(self.db)
         name = clean(name)
-        statement = [f"CREATE TABLE \"{name}\"(",]
+        statement = [f"CREATE TABLE IF NOT EXISTS \"{name}\"(",]
         
         with closing(connection) as connection:
             i = 1
